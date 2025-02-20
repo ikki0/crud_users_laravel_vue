@@ -1,9 +1,12 @@
 {
     "private": true,
     "type": "module",
+    "name": "laravel_backend_estudiantes",
+    "version": "1.0.0",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "serve": "vite preview"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.20",
