@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EstudianteController;
+use App\Http\Controllers\UserController;
 
 /*
 |-------------------------------------------------------------------------- 
@@ -16,13 +17,14 @@ use App\Http\Controllers\EstudianteController;
 */
 
 // Ruta para obtener el usuario autenticado (puedes eliminar el middleware 'auth:sanctum' si no deseas autenticación)
-Route::get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 // // Rutas para el controlador EstudianteController
- Route::apiResource('v1/estudiantes', EstudianteController::class);
+Route::apiResource('v1/estudiantes', EstudianteController::class);
 
+Route::apiResource('v1/usuario', UserController::class);
 // // Ruta para mostrar un estudiante (GET /api/estudiantes/{id})
 // Route::get('estudiantes/{id}', [EstudianteController::class, 'show']);
 

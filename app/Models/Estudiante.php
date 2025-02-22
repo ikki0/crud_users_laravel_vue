@@ -20,6 +20,6 @@ class Estudiante extends Model
   ];
 
   public function cursos(){
-    return $this->belongsToMany(Curso::class, 'curso_estudiante'); // Asegúrate de que la tabla pivote se llama 'curso_estudiante'
+    return $this->belongsToMany(Curso::class, 'curso_estudiante'); 
   }
 }
