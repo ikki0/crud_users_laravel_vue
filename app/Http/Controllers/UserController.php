@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Helpers\ResponseHelper;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException; // Importar QueryException
 
 class UserController extends Controller
 {
@@ -25,10 +26,21 @@ class UserController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * CREAR NUEVO USUARIO
      */
     public function store(Request $request)
     {
+        // VERIFICAR CAMPOS RECIBIDOS EXISTEN EN MODELO USUARIO
+        $fillable = (new User)->getFillable();
+
+        // ITERACIÓN SOBRE TODOS LOS CAMPOS RECIBIDOS
+        foreach ($request->input() as $key => $value) {
+            // VERIFICAR SI EL ELEMENTO NO EXISTE COMO CAMPO PERMITIDO
+            if (!in_array($key, $fillable)) {
+                return ResponseHelper::error("El campo $key no es válido");
+            }
+        }
+
         try {
             // VALIDAR PARÁMETROS DE ENTRADA EN $REQUEST
             $validateData = $request->validate([
@@ -38,10 +50,6 @@ class UserController extends Controller
                 "first_name" => 'required|string',
                 "last_name"  => 'required|string'
             ]);
-
-            if (!$validateData) {
-                dd('error validate data');
-            }
 
             // Encriptar la contraseña y actualizar el arreglo validado
             $validateData['password'] = bcrypt($validateData['password']);
@@ -54,6 +62,8 @@ class UserController extends Controller
                 : ResponseHelper::error($this->messages['MSG_CREATE_ERROR']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return ResponseHelper::error($e->errors(), 422);
+        } catch (QueryException $e) {
+            return ResponseHelper::error("Error base de datos: " . $e->getMessage(), 500);
         }
     }
 
@@ -76,8 +86,20 @@ class UserController extends Controller
     {
         $user = User::find($id);
 
+        // VALIDAR EXISTENCIA USUARIO
         if (!$user) {
             return ResponseHelper::error($this->messages['MSG_NOT_FOUND'], 404);
+        }
+
+        // VALIDAR EXISTENCIA DE CAMPOS MODELO USUARIO
+        $fillable = $user->getFillable(); // OBTENER CAMPOS PERMITIDOS
+
+        // ITERAR SOBRE TODOS LOS CAMPOS RECIBIDOS
+        foreach ($request->input() as $key => $value) {
+            // VERIFICAR QUE EL CAMPO EXISTA EN CAMPOS PERMITIDOS
+            if (!in_array($key, $fillable)) {
+                ResponseHelper::error("Error: El campo '$key' no es válido");
+            }
         }
 
         try {
@@ -88,13 +110,14 @@ class UserController extends Controller
                 "first_name" => 'sometimes|string|max:255',
                 "last_name"  => 'sometimes|string|max:255'
             ]);
-    
+
             return $user->update($validateData)
                 ? ResponseHelper::success($user, $this->messages['MSG_UPDATED_OK'])
                 : ResponseHelper::error($this->messages['MSG_UPDATE_ERROR']);
-
-        } catch(\Illuminate\Validation\ValidationException $e) {
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return ResponseHelper::error($e->errors(), 422);
+        } catch (QueryException $e) {
+            return ResponseHelper::error("Error  en base de datos: " . $e->getMessage(), 500);
         }
     }
 

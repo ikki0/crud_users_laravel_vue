@@ -6,6 +6,7 @@ use App\Models\Estudiante;
 use Illuminate\Http\Request;
 use App\Helpers\ResponseHelper;
 use App\Helpers\MessageConstants; // Importar las constantes de mensajes
+use Illuminate\Database\QueryException;
 
 class EstudianteController extends Controller
 {
@@ -47,8 +48,9 @@ class EstudianteController extends Controller
         // Obtener los campos permitidos del modelo Estudiante
         $fillable = (new Estudiante)->getFillable();
 
-        // Validar que los datos enviados solo contengan columnas permitidas
+        // ITERACIÓN SOBRE TODOS LOS CAMPOS RECIBIDOS
         foreach ($request->input() as $key => $value) {
+            // VERIFICAR SI EL ELEMENTO NO EXISTE COMO CAMPO PERMITIDO
             if (!in_array($key, $fillable)) {
                 return ResponseHelper::error("El campo '$key' no es válido.", 422);
             }
@@ -67,6 +69,8 @@ class EstudianteController extends Controller
                 : ResponseHelper::error($this->messages['MSG_CREATE_ERROR']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return ResponseHelper::error($e->errors(), 422);
+        } catch (QueryException $e) {
+            return ResponseHelper::error("Error base de datos: " . $e->getMessage(), 500);
         }
     }
 
@@ -105,15 +109,15 @@ class EstudianteController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $estudiante = Estudiante::find($id);
+        $student = Estudiante::find($id);
 
         // VALIDAR EXISTENCIA ESTUDIANTE
-        if (!$estudiante) {
+        if (!$student) {
             return ResponseHelper::error($this->messages['MSG_NOT_FOUND'], 404);
         }
 
         // VALIDAR EXISTENCIA DE CAMPOS MODELO ESTUDIANTE
-        $fillable = $estudiante->getFillable(); // OBTENER CAMPOS PERMITIDOS
+        $fillable = $student->getFillable(); // OBTENER CAMPOS PERMITIDOS
 
         foreach ($request->input() as $key => $value) {
             if (!in_array($key, $fillable)) {
@@ -128,11 +132,13 @@ class EstudianteController extends Controller
                 'foto'     => 'sometimes|nullable|string|max:255',
             ]);
 
-            return $estudiante->update($validatedData)
-                ? ResponseHelper::success($estudiante, $this->messages['MSG_UPDATED_OK'])
+            return $student->update($validatedData)
+                ? ResponseHelper::success($student, $this->messages['MSG_UPDATED_OK'])
                 : ResponseHelper::error($this->messages['MSG_UPDATE_ERROR']);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return ResponseHelper::error($e->errors(), 422);
+        } catch (QueryException $e) {
+            return ResponseHelper::error("Error en base de datos: " . $e->getMessage(), 500);
         }
     }
 
