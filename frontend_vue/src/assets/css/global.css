@@ -1,0 +1,17 @@
+:root {
+    --ibm-plex-sans: "IBM Plex Sans", sans-serif;
+    --ibm-plex-sans-optical-sizing: auto;
+    --ibm-plex-sans-variation-settings: "wdth" 100;
+}
+
+.ibm-plex-sans {
+    font-family: var(--ibm-plex-sans);
+    font-optical-sizing: var(--ibm-plex-sans-optical-sizing);
+    font-variation-settings: var(--ibm-plex-sans-variation-settings);
+    font-style: normal;
+}
+
+body {
+    font-family: var(--ibm-plex-sans);
+    font-size: 16px;
+}
