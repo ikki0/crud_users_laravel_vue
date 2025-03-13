@@ -65,7 +65,7 @@
     import { Student } from '../interfaces/Student';
     import { Temporal } from 'temporal-polyfill';
     import { confirmButton } from '@/utils/helpers';
-
+    import { ConfirmButtonOptions } from '@/interfaces/ConfirmButtonOptions';
     export default defineComponent({
         data() {
             return {
@@ -91,9 +91,21 @@
                 });
             },
             deleteStudent(id: number, name: string) {
-                confirmButton('http://localhost:8000/api/v1/estudiantes/', 'delete', id, 'Eliminar Registro', 'Desea eliminar a ' + name + '?');
+                const confirmButtonOptions: ConfirmButtonOptions = this.getDeleteButtonOptions(id, name);
+                confirmButton(confirmButtonOptions);
+            },
+
+            getDeleteButtonOptions(id: number, name: string): ConfirmButtonOptions {
+                return {
+                    url: `http://localhost:8000/api/v1/estudiantes/${id}`,
+                    method: 'delete',
+                    data: {},
+                    title: 'Eliminar Registro',
+                    message: `Desea eliminar a ${name}?`
+                } as ConfirmButtonOptions
             }
         }
+
     });
 </script>
 
