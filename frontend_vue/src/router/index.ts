@@ -11,17 +11,17 @@ const routes: Array<RouteRecordRaw> = [
         component: HomeView,
     },
     {
-        path: "/createEstudent",
+        path: "/create-student",
         name: "StudentCreate",
         component: StudentCreate,
     },
     {
-        path: "/editEstudent/:id",
+        path: "/edit-estudent/:id",
         name: "StudentEdit",
         component: StudentEdit,
     },
     {
-        path: "/viewEstudent/:id",
+        path: "/view-student/:id",
         name: "StudentView",
         component: StudentView,
     },

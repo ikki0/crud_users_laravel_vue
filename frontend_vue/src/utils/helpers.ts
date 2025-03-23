@@ -1,15 +1,16 @@
 import Swal from "sweetalert2";
 import axios, { AxiosResponse } from "axios";
 import { ConfirmButtonOptions } from "@/interfaces/ConfirmButtonOptions";
+import { InterfaceRequest } from "@/interfaces/InterfaceRequest";
 // intereasante la libreria de toast que si no mal recuerdo muestra una notificacion , dura unos cuantos segundos en plan success o error o warning
 
 const ERROR_SEVER: string = 'Error: en el Servidor'
 
 export function showAlert(title: string, icon: any, focus?: string) {
     // SI NO SE PASO CORRECTAMENTE EL ICONO, SE PONE EL FOCO EN EL ELEMENTO CON EL ID DEL ICONO
-    if (!focus) {
-        document.getElementById(icon)?.focus();
-    }
+    const elementId = focus || icon;
+    document.getElementById(elementId)?.focus();
+
     // GENERAR VENTANA PERSONALIZADA
     Swal.fire({
         title: title,
@@ -40,21 +41,23 @@ export function confirmButton(options: ConfirmButtonOptions) {
         cancelButtonText: '<i class="fa-solid fa-ban"></i> Cancelar',
     }).then((result) => {
         if (result.isConfirmed) {
-            genericRequest(options.url, options.method, options.data);
+            genericRequest(options.request);
         } else {
             showAlert('Operación cancelada', 'info');
         }
     });
 }
 
-export async function genericRequest(url: string, method: string, data: {}): Promise<void> {
+export async function genericRequest(request: InterfaceRequest): Promise<void> {
 
     try { // RESPUESTA STATUS 200
-        const response: AxiosResponse = await axios({
-            url,
-            method,
-            data
-        });
+        // const response: AxiosResponse = await axios({
+        //     url,
+        //     method,
+        //     data
+        // });
+        const response: AxiosResponse = await axios(request);
+
         showAlert(response.data.message, 'success');
         window.setTimeout(() => {
             window.location.href = '/';
@@ -64,3 +67,11 @@ export async function genericRequest(url: string, method: string, data: {}): Pro
         showAlert('error en solicitud: ' + error, 'error'); // ESTUDIANTE NO ELIMINADO
     }
 };
+
+export function constructRequest(url: string, method: string, data: {}): InterfaceRequest {
+    return {
+        url: url,
+        method: method,
+        data: data
+    } as InterfaceRequest;
+}

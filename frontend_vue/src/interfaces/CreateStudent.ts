@@ -1,5 +1,5 @@
 export interface CreateStudent {
-    foto?: string | null;
+    foto?: string | undefined;
     nombre: string;
     apellido: string;
 }

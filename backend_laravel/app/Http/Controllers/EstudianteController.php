@@ -59,7 +59,7 @@ class EstudianteController extends Controller
             $validatedData = $request->validate([
                 'nombre'   => 'required|string|max:255',
                 'apellido' => 'required|string|max:255',
-                'foto'     => 'nullable|string|max:255',
+                'foto'     => 'nullable|string',
             ]);
 
             $result = Estudiante::create($validatedData);
@@ -129,7 +129,7 @@ class EstudianteController extends Controller
             $validatedData = $request->validate([
                 'nombre'   => 'sometimes|required|string|max:255',
                 'apellido' => 'sometimes|required|string|max:255',
-                'foto'     => 'sometimes|nullable|string|max:255',
+                'foto'     => 'sometimes|nullable|string',
             ]);
 
             return $student->update($validatedData)

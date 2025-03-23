@@ -6,35 +6,36 @@
                     <h1>Crear Estudiantes</h1>
                 </div>
                 <div class="card-body">
-                    <form>
+                    <form @submit.prevent="processCreateStudent($event)">
                         <div class="d-grid col-6 mx-auto mb-3">
-                            <img v-if="this.foto" :src="this.foto" alt="imagen foto estudiante"
-                                class="img-thumbnail custom_img_true">
-                            <img v-else src="https://cdn-icons-png.freepik.com/512/7175/7175414.png"
-                                alt="imagen foto estudiante" class="img-thumbnail custom_img_false">
+                            <img v-if="createStudent.foto" :src="createStudent.foto" alt="imagen foto estudiante"
+                                id="photo" class="img-thumbnail custom_image custom_img_true">
+                            <img v-else src="https://cdn-icons-png.freepik.com/512/7175/7175414.png" id="photo"
+                                alt="imagen foto estudiante" class="img-thumbnail custom_image custom_img_false">
                         </div>
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">
                                 <i class="fa-solid fa-user"></i>
                             </span>
-                            <input :model="nombre" type="text" placeholder="Nombre Estudiante..." required
-                                maxlength="50" class="form-control">
+                            <input v-model="createStudent.nombre" type="text" placeholder="Nombre Estudiante..."
+                                required maxlength="50" id="name" class="form-control">
                         </div>
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">
                                 <i class="fa-solid fa-user"></i>
                             </span>
-                            <input :model="apellido" type="text" placeholder="Apellido Estudiante..." required
-                                maxlength="50" class="form-control">
+                            <input v-model="createStudent.apellido" type="text" placeholder="Apellido Estudiante..."
+                                required maxlength="50" id="last_name" class="form-control">
                         </div>
 
                         <div class="input-group mb-3">
                             <span class="input-group-text">
                                 <i class="fa-solid fa-gift"></i>
                             </span>
-                            <input type="file" accept="image/png, image/jpeg, image/gif" class="form-control">
+                            <input @change="processPhoto($event)" type="file" accept="image/png, image/jpeg, image/gif"
+                                class="form-control">
                         </div>
 
                         <div class="d-grid col-6 mx-auto mb-3">
@@ -55,28 +56,76 @@
     import { defineComponent } from 'vue';
     import { CreateStudent } from '@/interfaces/CreateStudent';
     import { Temporal } from 'temporal-polyfill';
-    import { confirmButton } from '@/utils/helpers';
-    import { ConfirmButtonOptions } from '@/interfaces/ConfirmButtonOptions';
+    import { confirmButton, constructRequest, genericRequest } from '@/utils/Helpers';
+    import { InterfaceRequest } from '@/interfaces/InterfaceRequest';
+    import { validateIsEmptyField } from '@/utils/Validators';
+    import { showAlert } from '@/utils/Helpers';
+
     export default defineComponent({
         data() {
             return {
-                createStudent: [] as CreateStudent[],
+                createStudent: {
+                    nombre: '',
+                    apellido: '',
+                    foto: '',
+                } as CreateStudent,
                 loaded: false,
-                url: 'http://localhost:8000/api/v1/estudiantes',
+                url: 'http://localhost:8000/api/v1/estudiantes/',
             }
         },
         methods: {
-            createStudent() {
-
+            async processPhoto(event: any) {
+                try {
+                    const photo = await this.getPhoto(event);
+                    this.createStudent.foto = String(photo); // Convertir a string explícitamente
+                    this.setPhoto(photo);
+                } catch (error) {
+                    console.error('Error al procesar la foto:', error);
+                }
             },
-            getDeleteButtonOptions(id: number, name: string): ConfirmButtonOptions {
-                return {
-                    url: `http://localhost:8000/api/v1/estudiantes/${id}`,
-                    method: 'delete',
-                    data: {},
-                    title: 'Eliminar Registro',
-                    message: `Desea eliminar a ${name}?`
-                } as ConfirmButtonOptions
+            getPhoto(event: any): Promise<CreateStudent['foto']> {
+                return new Promise((resolve, reject) => {
+                    const file = event.target.files[0];
+                    if (!file) {
+                        resolve('');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        resolve(reader.result as string || '');
+                    };
+                    reader.onerror = (error) => {
+                        reject(error);
+                    };
+                });
+            },
+            setPhoto(photo: CreateStudent['foto']) {
+                const htmlPhoto = document.getElementById('photo') as HTMLImageElement;
+                if (htmlPhoto) {
+                    htmlPhoto.src = photo || '';
+                }
+                console.log(photo);
+            },
+
+
+            processCreateStudent(event: any) {
+                // VALIDATE EMPTY NAME 
+                if (validateIsEmptyField(this.createStudent.nombre)) {
+                    showAlert('Error: Es necesario ingresar un nombre.', 'error', 'name');
+                    return;
+                }
+                // VALIDATE EMPTY LAST NAME
+                if (validateIsEmptyField(this.createStudent.apellido)) {
+                    showAlert('Error: Es necesario ingresar un apellido.', 'error', 'last_name');
+                    return;
+                }
+                // CONSTRUCT REQUEST
+                const request = constructRequest(this.url, 'post', this.createStudent);
+
+                // SEND REQUEST
+                genericRequest(request);
+
             }
         }
 
@@ -84,16 +133,12 @@
 </script>
 
 <style scoped>
-.custom_img_true {
-    width: 100px;
-}
-
-.custom_img_false {
-    max-width: 100%;
-    height: 200px;
+.custom_image {
+    width: 100%;
+    max-width: 280px;
     display: block;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
+    aspect-ratio: 1/1;
 }
 
 .button-save {

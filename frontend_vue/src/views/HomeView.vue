@@ -64,8 +64,9 @@
     import { defineComponent } from 'vue';
     import { Student } from '../interfaces/Student';
     import { Temporal } from 'temporal-polyfill';
-    import { confirmButton } from '@/utils/helpers';
+    import { confirmButton, constructRequest } from '@/utils/Helpers';
     import { ConfirmButtonOptions } from '@/interfaces/ConfirmButtonOptions';
+    import { InterfaceRequest } from '@/interfaces/InterfaceRequest';
     export default defineComponent({
         data() {
             return {
@@ -91,15 +92,13 @@
                 });
             },
             deleteStudent(id: number, name: string) {
-                const confirmButtonOptions: ConfirmButtonOptions = this.getDeleteButtonOptions(id, name);
+                const request = constructRequest(`http://localhost:8000/api/v1/estudiantes/${id}`, 'delete', {});
+                const confirmButtonOptions: ConfirmButtonOptions = this.getDeleteButtonOptions(id, name, request);
                 confirmButton(confirmButtonOptions);
             },
 
-            getDeleteButtonOptions(id: number, name: string): ConfirmButtonOptions {
+            getDeleteButtonOptions(id: number, name: string, request: InterfaceRequest): ConfirmButtonOptions {
                 return {
-                    url: `http://localhost:8000/api/v1/estudiantes/${id}`,
-                    method: 'delete',
-                    data: {},
                     title: 'Eliminar Registro',
                     message: `Desea eliminar a ${name}?`
                 } as ConfirmButtonOptions

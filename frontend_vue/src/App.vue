@@ -24,9 +24,10 @@
                                 <router-link class="dropdown-item" to="/">Listar Estudiantes</router-link>
                             </li>
                             <li>
-                                <router-link class="dropdown-item" to="/createEstudent">
+                                <router-link class="dropdown-item" to="/create-student">
                                     Registrar Nuevo Estudiante
                                 </router-link>
+
                             </li>
                         </ul>
                     </li>
